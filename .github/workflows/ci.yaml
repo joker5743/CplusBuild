@@ -1,0 +1,73 @@
+name: C++ CI/CD
+
+# 触发条件
+on:
+  push:
+    branches:
+    # - main
+    - '*'
+
+# 任务定义
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up CMake
+      uses: lukka/run-cmake@v3
+
+    - name: Set up GCC
+      # uses: actions/setup-python@v3
+      # with:
+      #   distribution: 'ubuntu-20.04'
+      #   gcc-version: '9'
+      run: |
+        sudo apt-get update
+        sudo apt-get install gcc g++
+
+    - name: Build with CMake
+      run: |
+        mkdir -p build
+        cd build
+        cmake ..
+        make -j4
+
+    - name: Run tests
+      run: |
+        cd build
+        ./BuildCPlusProject
+        ctest --output-on-failure
+    # deploy:
+    #   needs: build
+    #   runs-on: ubuntu-latest
+
+    #   steps:
+    #   - name: Checkout code
+    #     uses: actions/checkout@v3
+
+    #   - name: Set up CMake
+    #     uses: lukka/run-cmake@v3
+
+    #   - name: Set up GCC
+    #     uses: actions/setup-python@v3
+    #     with:
+    #       distribution: 'ubuntu-20.04'
+    #       gcc-version: '9'
+
+    #   - name: Build with CMake
+    #     run: |
+    #       mkdir -p build
+    #       cd build
+    #       cmake ..
+    #       make -j4
+    # - name: Deploy to production
+    #   run: |
+    #     # 部署脚本
+    #     echo "Deploying to production..."
+    #     # 例如，使用 SSH 部署到服务器
+    #     ssh user@your-server "cd /path/to/app && git pull && make -j4 && ./your-app"
+    #   env:
+    #     SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
